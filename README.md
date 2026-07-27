@@ -37,11 +37,3 @@ Outputs land in `outputs/` (`classification_report.csv`, `confusion_matrix.csv`,
 ```bash
 pytest
 ```
-
-## Why these changes
-
-The original notebook vectorized reviews with bag-of-words or TF-IDF and classified with `GaussianNB` (63% accuracy) or `RandomForestClassifier` (85%). Both throw away word order and context - "not good" and "good" look similar to a bag-of-words model. The notebook's TF-IDF experiment also had a bug: after fitting `TfidfVectorizer` and transforming the data into `x_train_tfidf`/`x_test_tfidf`, the very next `RandomForestClassifier` cell trained on `x_train_bow`/`x_test_bow` instead - so the TF-IDF features were computed but never actually used, and the reported "TF-IDF" accuracy (0.7506) is identical to the earlier bigram-BoW result by coincidence of copy-pasted code, not because TF-IDF was evaluated.
-
-Fine-tuning `distilbert-base-uncased` instead starts from a model already trained on a large text corpus and adapts it to this specific sentiment task, capturing word order and context that bag-of-words approaches can't - substantially higher accuracy is achievable on the same data.
-
-**Verification note**: this network blocks access to huggingface.co, so the fine-tuning and evaluation modules (which need to download the pretrained model) could not be smoke-tested end-to-end here. The data loader and preprocessing modules were verified locally with passing tests. Verify a full run on unrestricted network/CI before relying on it.
